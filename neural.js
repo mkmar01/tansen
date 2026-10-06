@@ -14,7 +14,10 @@ export const VOICES = [
   { id: 'am_michael', label: 'Michael (US, male)' },
   { id: 'am_fenrir', label: 'Fenrir (US, male)' },
   { id: 'bf_emma', label: 'Emma (UK, female)' },
+  { id: 'bm_daniel', label: 'Daniel (UK, male) · Jarvis-style' },
+  { id: 'bm_lewis', label: 'Lewis (UK, male) · Jarvis-style' },
   { id: 'bm_george', label: 'George (UK, male)' },
+  { id: 'bm_fable', label: 'Fable (UK, male)' },
 ];
 
 export const isNeural = voiceURI => voiceURI?.startsWith(PREFIX);
