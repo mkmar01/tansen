@@ -24,6 +24,9 @@ export const isNeural = voiceURI => voiceURI?.startsWith(PREFIX);
 
 let ttsPromise;
 let cpuOnly = false;
+let gpuVerified = false; // set once WebGPU has produced a sentence
+const GPU_TIMEOUT_MS = 30_000; // some devices expose WebGPU but never finish; fall back to CPU then
+export const hooks = { onGpuFallback: null };
 export let lastRun = null; // { took, seconds } of the most recent sentence
 export let backend = ''; // 'WebGPU' or 'CPU' once the model has loaded
 let queue = Promise.resolve(); // the model handles one request at a time
@@ -96,7 +99,26 @@ export function synthesize(text, voiceURI) {
     const tts = await load();
     console.info(`[neural] generating: “${text.slice(0, 40)}”`);
     const t0 = performance.now();
-    const audio = await tts.generate(text, { voice });
+    const generation = tts.generate(text, { voice });
+    let audio;
+    if (backend === 'WebGPU' && !gpuVerified) {
+      let timer;
+      const timeout = new Promise(resolve => { timer = setTimeout(() => resolve(null), GPU_TIMEOUT_MS); });
+      audio = await Promise.race([generation, timeout]);
+      clearTimeout(timer);
+      if (!audio) {
+        console.warn(`[neural] WebGPU produced nothing in ${GPU_TIMEOUT_MS / 1000}s — switching to CPU`);
+        generation.catch(() => {});
+        cpuOnly = true;
+        ttsPromise = undefined;
+        backend = '';
+        hooks.onGpuFallback?.();
+        return run(); // retries on the CPU model
+      }
+      gpuVerified = true;
+    } else {
+      audio = await generation;
+    }
     const took = (performance.now() - t0) / 1000;
     const seconds = audio.audio.length / audio.sampling_rate;
     console.info(`[neural] ${took.toFixed(2)}s to make ${seconds.toFixed(2)}s of audio`);

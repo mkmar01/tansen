@@ -33,7 +33,7 @@ const settings = {
   pitch: 1,
   accessKey: '',
   keepAwake: true,
-  cpuOnly: false,
+  cpuOnly: /iPhone|iPad|iPod/.test(navigator.userAgent), // WebGPU on iOS stalls with this model
   skipLinks: true,
   ...JSON.parse(localStorage.getItem('settings') || '{}'),
 };
@@ -737,6 +737,11 @@ async function startGate() {
 
 function init() {
   neural.setCpuOnly(settings.cpuOnly);
+  neural.hooks.onGpuFallback = () => {
+    settings.cpuOnly = true;
+    saveSettings();
+    toast('GPU voice stalled — switched to the smaller CPU voice. Downloading it now…');
+  };
   if (!('speechSynthesis' in window)) {
     toast('This browser can’t read text aloud.');
     return;
