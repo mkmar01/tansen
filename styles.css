@@ -1,0 +1,212 @@
+:root {
+  color-scheme: light dark;
+  --bg: #faf8f5;
+  --fg: #1d1b20;
+  --muted: #6b6670;
+  --card: #ffffff;
+  --border: #e6e1da;
+  --accent: #6d4aff;
+  --accent-fg: #ffffff;
+  --hl: #ffe9a8;
+  --danger: #c62828;
+  --safe-b: env(safe-area-inset-bottom);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141317;
+    --fg: #ece8f0;
+    --muted: #9a94a2;
+    --card: #1f1d24;
+    --border: #2d2a33;
+    --accent: #9b84ff;
+    --accent-fg: #14121a;
+    --hl: #4d4113;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: calc(env(safe-area-inset-top) + .5rem) 1rem .5rem;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+main { padding: 1rem; max-width: 720px; margin: 0 auto; }
+body.in-player main { padding-bottom: 13rem; }
+
+.icon-btn {
+  background: none;
+  border: 0;
+  padding: .4rem;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 0;
+  color: var(--fg);
+}
+.icon-btn svg { width: 24px; height: 24px; fill: currentColor; }
+.icon-btn.big svg { width: 34px; height: 34px; }
+.icon-btn.danger { color: var(--muted); font-size: 1rem; line-height: 1; }
+
+.primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: 0;
+  border-radius: 12px;
+  padding: .8rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.primary:disabled { opacity: .5; }
+.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .7rem 1rem;
+  cursor: pointer;
+}
+.wide { width: 100%; }
+
+.list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .6rem; }
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .9rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.card-main { flex: 1; min-width: 0; }
+.card-title {
+  font-weight: 600;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.card-meta { color: var(--muted); font-size: .85rem; }
+.card-progress { position: absolute; left: 0; bottom: 0; height: 3px; width: var(--p); background: var(--accent); }
+.muted { color: var(--muted); text-align: center; margin-top: 2rem; }
+
+.reader { font: 1.2rem/1.7 "New York", "Iowan Old Style", Georgia, serif; }
+.reader p { margin: 0 0 1em; }
+.reader span { border-radius: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color .2s; }
+.reader span.current { background: var(--hl); box-shadow: 0 0 0 2px var(--hl); }
+
+.controls {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  padding: .75rem 1rem calc(var(--safe-b) + .75rem);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+}
+.controls-inner { max-width: 720px; margin: 0 auto; }
+#progress { width: 100%; accent-color: var(--accent); }
+.progress-meta { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); }
+.buttons { display: flex; justify-content: center; align-items: center; gap: 2rem; margin: .25rem 0 .5rem; }
+.play-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-fg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.play-btn svg { width: 30px; height: 30px; fill: currentColor; }
+.row { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; color: var(--muted); }
+.row select { margin-left: .35rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .25rem .4rem; }
+
+dialog {
+  width: min(560px, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  color: var(--fg);
+  padding: 1.25rem;
+}
+dialog::backdrop { background: rgb(0 0 0 / .45); }
+dialog h2 { margin: 0 0 1rem; font-size: 1.2rem; }
+dialog hr { border: 0; border-top: 1px solid var(--border); margin: 1.1rem 0; }
+
+.tabs { display: flex; gap: .25rem; background: var(--bg); padding: .25rem; border-radius: 12px; margin-bottom: 1rem; }
+.tabs button { flex: 1; border: 0; background: none; padding: .5rem; border-radius: 9px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--card); box-shadow: 0 1px 3px rgb(0 0 0 / .12); font-weight: 600; }
+
+.field { display: grid; gap: .3rem; margin-bottom: .9rem; }
+.field > span { font-size: .85rem; color: var(--muted); }
+/* 16px inputs stop iOS from zooming in on focus */
+input[type=text], input[type=url], input[type=password], textarea, select.full {
+  width: 100%;
+  padding: .7rem .8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  font-size: 16px;
+}
+input[type=range] { width: 100%; accent-color: var(--accent); }
+textarea { min-height: 10rem; resize: vertical; }
+.check { display: flex; align-items: center; gap: .5rem; margin-bottom: .6rem; }
+.hint { font-size: .8rem; color: var(--muted); margin: .4rem 0 .9rem; }
+.actions { display: flex; gap: .5rem; justify-content: flex-end; margin-top: 1rem; }
+.status { min-height: 1.4em; font-size: .9rem; color: var(--muted); margin: 0; }
+.status.error { color: var(--danger); }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 1rem);
+  transform: translateX(-50%);
+  max-width: 90vw;
+  padding: .6rem 1rem;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: .9rem;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+.toast.show { opacity: 1; }
+body.in-player .toast { bottom: 12rem; }

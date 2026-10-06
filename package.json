@@ -1,0 +1,11 @@
+{
+  "name": "tansen",
+  "private": true,
+  "type": "module",
+  "description": "Listen to emails, documents and web pages like an audiobook.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "vercel dev",
+    "test": "node --test"
+  }
+}
