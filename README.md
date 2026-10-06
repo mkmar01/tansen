@@ -63,3 +63,8 @@ Use this from bookmarklets or a browser extension.
 | `store.js` | IndexedDB library and reading positions |
 | `sw.js`, `manifest.webmanifest` | Offline support and install metadata |
 | `api/fetch.js` | Serverless page fetcher (bypasses CORS), with access-key protection and private-IP blocking |
+
+## License
+[MIT](LICENSE). The app loads third-party libraries and models at runtime from CDNs and Hugging Face
+(Kokoro-82M and kokoro-js, Apache-2.0; Readability, Apache-2.0; pdf.js, Apache-2.0; mammoth, BSD-2-Clause).
+They are not bundled in this repository and keep their own licenses.

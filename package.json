@@ -1,6 +1,7 @@
 {
   "name": "tansen",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Listen to emails, documents and web pages like an audiobook.",
   "engines": { "node": ">=20" },
