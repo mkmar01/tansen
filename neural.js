@@ -20,6 +20,9 @@ export const VOICES = [
 export const isNeural = voiceURI => voiceURI?.startsWith(PREFIX);
 
 let ttsPromise;
+let cpuOnly = false;
+export let lastRun = null; // { took, seconds } of the most recent sentence
+export let backend = ''; // 'WebGPU' or 'CPU' once the model has loaded
 let queue = Promise.resolve(); // the model handles one request at a time
 
 async function hasWebGPU() {
@@ -28,6 +31,13 @@ async function hasWebGPU() {
   } catch {
     return false;
   }
+}
+
+// Forces the CPU (WASM) model even when WebGPU exists. Takes effect on the next load.
+export function setCpuOnly(value) {
+  if (value === cpuOnly) return;
+  cpuOnly = value;
+  ttsPromise = undefined;
 }
 
 // onProgress receives a 0–1 number while the model downloads.
@@ -50,9 +60,10 @@ export function load(onProgress) {
         },
       });
     };
-    if (await hasWebGPU()) {
+    if (!cpuOnly && await hasWebGPU()) {
       try {
         const tts = await create('webgpu', 'fp32');
+        backend = 'WebGPU';
         console.info('[neural] using WebGPU');
         return tts;
       } catch (err) {
@@ -60,6 +71,7 @@ export function load(onProgress) {
       }
     }
     const tts = await create('wasm', 'q8');
+    backend = 'CPU';
     console.info('[neural] using WASM (CPU)');
     return tts;
   })().catch(err => {
@@ -77,7 +89,9 @@ export function synthesize(text, voiceURI) {
     const t0 = performance.now();
     const audio = await tts.generate(text, { voice });
     const took = (performance.now() - t0) / 1000;
-    console.info(`[neural] ${took.toFixed(2)}s to make ${(audio.audio.length / audio.sampling_rate).toFixed(2)}s of audio`);
+    const seconds = audio.audio.length / audio.sampling_rate;
+    console.info(`[neural] ${took.toFixed(2)}s to make ${seconds.toFixed(2)}s of audio`);
+    lastRun = { took, seconds };
     return audio.toBlob();
   };
   const job = queue.then(run);

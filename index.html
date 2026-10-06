@@ -122,6 +122,8 @@
     <label class="check"><input id="keepAwakeChk" type="checkbox"> Keep screen on while reading</label>
     <p class="hint">iOS stops browser speech when the screen locks, so this is on by default.</p>
     <label class="check"><input id="skipLinksChk" type="checkbox"> Don’t read out web links</label>
+    <label class="check"><input id="cpuOnlyChk" type="checkbox"> High-quality voices: use CPU only</label>
+    <p class="hint">Turn this on if “Test voice” gets stuck on “Generating”. It uses a smaller model that works on more devices but is slower.</p>
     <label class="field"><span>Access key (for web page import)</span><input id="accessKeyInput" type="password" autocomplete="off" placeholder="The ACCESS_KEY you set when deploying"></label>
     <div class="actions"><button type="button" id="settingsClose" class="primary">Done</button></div>
   </dialog>

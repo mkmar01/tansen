@@ -15,6 +15,7 @@ const settings = {
   pitch: 1,
   accessKey: '',
   keepAwake: true,
+  cpuOnly: false,
   skipLinks: true,
   ...JSON.parse(localStorage.getItem('settings') || '{}'),
 };
@@ -424,6 +425,7 @@ function bindSettings() {
     $('#pitchRange').value = settings.pitch;
     $('#keepAwakeChk').checked = settings.keepAwake;
     $('#skipLinksChk').checked = settings.skipLinks;
+    $('#cpuOnlyChk').checked = settings.cpuOnly;
     $('#accessKeyInput').value = settings.accessKey;
     dlg.showModal();
   };
@@ -435,6 +437,11 @@ function bindSettings() {
     if (!settings.keepAwake) releaseWakeLock();
     else if (player.playing) acquireWakeLock();
   };
+  $('#cpuOnlyChk').onchange = e => {
+    settings.cpuOnly = e.target.checked;
+    saveSettings();
+    neural.setCpuOnly(settings.cpuOnly);
+  };
   $('#skipLinksChk').onchange = e => { settings.skipLinks = e.target.checked; saveSettings(); };
   $('#accessKeyInput').onchange = e => { settings.accessKey = e.target.value.trim(); saveSettings(); };
   $('#testVoiceBtn').onclick = async () => {
@@ -444,8 +451,10 @@ function bindSettings() {
       unlockAudio();
       try {
         await loadNeural();
-        toast('Generating…');
+        toast(`Generating on ${neural.backend}… (the first sentence can take a while)`);
         const url = URL.createObjectURL(await neural.synthesize(sample, settings.voiceURI));
+        const { took, seconds } = neural.lastRun;
+        toast(`${neural.backend}: made ${seconds.toFixed(1)}s of audio in ${took.toFixed(1)}s`);
         player.audio.src = url;
         player.audio.playbackRate = settings.rate;
         await player.audio.play();
@@ -615,6 +624,7 @@ function bindPlayer() {
 }
 
 function init() {
+  neural.setCpuOnly(settings.cpuOnly);
   if (!('speechSynthesis' in window)) {
     toast('This browser can’t read text aloud.');
     return;
