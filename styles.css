@@ -210,3 +210,13 @@ textarea { min-height: 10rem; resize: vertical; }
 }
 .toast.show { opacity: 1; }
 body.in-player .toast { bottom: 12rem; }
+
+/* access-key gate: nothing else is shown until the key is accepted */
+body.locked > header, body.locked > main, body.locked > footer { display: none; }
+.gate { display: none; min-height: 100dvh; padding: 1.5rem; place-items: center; }
+body.locked .gate { display: grid; }
+.gate-card { width: min(22rem, 100%); text-align: center; }
+.gate-card img { border-radius: 18px; }
+.gate-card h1 { margin: .5rem 0 0; }
+.gate-card .muted { margin: .25rem 0 1.25rem; }
+.gate-card .field { text-align: left; }

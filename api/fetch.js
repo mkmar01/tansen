@@ -17,9 +17,12 @@ export async function GET(request) {
     return error(401, 'Wrong or missing access key. Add it in Settings.');
   }
 
+  const params = new URL(request.url).searchParams;
+  if (params.has('check')) return Response.json({ ok: true }, { headers: { 'cache-control': 'no-store' } }); // lets the app verify the key
+
   let target;
   try {
-    target = new URL(new URL(request.url).searchParams.get('url'));
+    target = new URL(params.get('url'));
   } catch {
     return error(400, 'That doesn’t look like a valid link.');
   }

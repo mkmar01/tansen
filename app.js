@@ -623,6 +623,87 @@ function bindPlayer() {
   });
 }
 
+// ---------- access gate ----------
+// The app stays hidden until the access key is accepted. (The key itself protects the /api/fetch endpoint
+// on the server; the gate keeps the rest of the app behind it too.)
+
+const VERIFIED_KEY = 'verifiedKey';
+let locked = true;
+
+// Resolves to 'ok', 'wrong', 'misconfigured', 'no-api' (static hosting without the server) or 'offline'.
+async function checkKey(key) {
+  try {
+    const res = await fetch('/api/fetch?check=1', { headers: { 'x-access-key': key } });
+    if (res.ok) return 'ok';
+    if (res.status === 401) return 'wrong';
+    if (res.status === 404) return 'no-api';
+    return 'misconfigured';
+  } catch {
+    return 'offline';
+  }
+}
+
+function setLocked(value, message = '') {
+  locked = value;
+  document.body.classList.toggle('locked', value);
+  if (value) {
+    pause();
+    $('#gateKey').value = '';
+    gateStatus(message, !!message);
+  }
+}
+
+const gateStatus = (msg, isError = false) => {
+  $('#gateStatus').textContent = msg;
+  $('#gateStatus').classList.toggle('error', isError);
+};
+
+function unlock() {
+  setLocked(false);
+  route().then(handleIncoming);
+}
+
+function bindGate() {
+  $('#gateForm').onsubmit = async e => {
+    e.preventDefault();
+    const key = $('#gateKey').value.trim();
+    if (!key) return;
+    $('#gateSubmit').disabled = true;
+    gateStatus('Checking…');
+    const result = await checkKey(key);
+    $('#gateSubmit').disabled = false;
+    const problem = {
+      wrong: 'That key isn’t right.',
+      misconfigured: 'The server isn’t set up with an ACCESS_KEY yet.',
+      offline: 'Can’t reach the server. Check your connection.',
+    }[result];
+    if (problem) return gateStatus(problem, true);
+    settings.accessKey = key;
+    saveSettings();
+    if (result === 'ok') localStorage.setItem(VERIFIED_KEY, key);
+    else toast('No server API here, so web-page import won’t work.'); // local static hosting
+    unlock();
+  };
+
+  $('#lockBtn').onclick = () => {
+    $('#settingsDialog').close();
+    localStorage.removeItem(VERIFIED_KEY);
+    settings.accessKey = '';
+    saveSettings();
+    setLocked(true);
+  };
+}
+
+async function startGate() {
+  const key = settings.accessKey;
+  if (!key || localStorage.getItem(VERIFIED_KEY) !== key) return setLocked(true);
+  unlock(); // verified before: open straight away, even offline
+  if ((await checkKey(key)) === 'wrong') {
+    localStorage.removeItem(VERIFIED_KEY);
+    setLocked(true, 'Your access key was changed. Enter the new one.');
+  }
+}
+
 function init() {
   neural.setCpuOnly(settings.cpuOnly);
   if (!('speechSynthesis' in window)) {
@@ -633,8 +714,9 @@ function init() {
   bindPlayer();
   bindAddDialog();
   bindSettings();
-  window.addEventListener('hashchange', route);
-  route().then(handleIncoming);
+  window.addEventListener('hashchange', () => { if (!locked) route(); });
+  bindGate();
+  startGate();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 }
 

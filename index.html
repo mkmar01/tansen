@@ -14,7 +14,18 @@
   <link rel="stylesheet" href="styles.css">
   <title>Tansen</title>
 </head>
-<body>
+<body class="locked">
+  <section id="gate" class="gate">
+    <form id="gateForm" class="gate-card" autocomplete="off">
+      <img src="icons/icon-192.png" alt="" width="72" height="72">
+      <h1>Tansen</h1>
+      <p class="muted">Enter your access key to continue.</p>
+      <label class="field"><span>Access key</span><input id="gateKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+      <p id="gateStatus" class="status" role="status"></p>
+      <button id="gateSubmit" type="submit" class="primary wide">Unlock</button>
+    </form>
+  </section>
+
   <header class="topbar">
     <button id="backBtn" class="icon-btn" aria-label="Back to library" hidden>
       <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
@@ -125,6 +136,7 @@
     <label class="check"><input id="cpuOnlyChk" type="checkbox"> High-quality voices: use CPU only</label>
     <p class="hint">Turn this on if “Test voice” gets stuck on “Generating”. It uses a smaller model that works on more devices but is slower.</p>
     <label class="field"><span>Access key (for web page import)</span><input id="accessKeyInput" type="password" autocomplete="off" placeholder="The ACCESS_KEY you set when deploying"></label>
+    <button type="button" id="lockBtn" class="secondary wide">Lock app</button>
     <div class="actions"><button type="button" id="settingsClose" class="primary">Done</button></div>
   </dialog>
 

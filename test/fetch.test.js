@@ -11,6 +11,13 @@ test('rejects requests without the right access key', async () => {
   assert.equal((await call('https://example.com', '')).status, 401);
 });
 
+test('check mode verifies the access key without fetching anything', async () => {
+  process.env.ACCESS_KEY = 'secret';
+  const check = key => GET(new Request('http://app.test/api/fetch?check=1', { headers: { 'x-access-key': key } }));
+  assert.equal((await check('secret')).status, 200);
+  assert.equal((await check('nope')).status, 401);
+});
+
 test('fails closed when ACCESS_KEY is not configured', async () => {
   delete process.env.ACCESS_KEY;
   assert.equal((await call('https://example.com')).status, 500);
