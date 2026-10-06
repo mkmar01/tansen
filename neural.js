@@ -100,6 +100,8 @@ export function synthesize(text, voiceURI) {
     console.info(`[neural] generating: “${text.slice(0, 40)}”`);
     const t0 = performance.now();
     const generation = tts.generate(text, { voice });
+    const heartbeat = setInterval(() => console.info(`[neural] still generating… ${Math.round((performance.now() - t0) / 1000)}s`), 10_000);
+    generation.finally(() => clearInterval(heartbeat)).catch(() => {});
     let audio;
     if (backend === 'WebGPU' && !gpuVerified) {
       let timer;
@@ -123,7 +125,9 @@ export function synthesize(text, voiceURI) {
     const seconds = audio.audio.length / audio.sampling_rate;
     console.info(`[neural] ${took.toFixed(2)}s to make ${seconds.toFixed(2)}s of audio`);
     lastRun = { took, seconds };
-    return audio.toBlob();
+    const blob = audio.toBlob();
+    console.info(`[neural] done: ${blob.size} bytes of audio`);
+    return blob;
   };
   const job = queue.then(run);
   queue = job.catch(() => {});

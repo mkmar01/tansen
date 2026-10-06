@@ -55,6 +55,12 @@ const player = {
   neuralCache: new Map(), // `${voice}|${chunk index}` -> Promise<object URL>
 };
 player.audio.preservesPitch = true;
+for (const ev of ['error', 'playing', 'pause', 'ended', 'stalled', 'waiting']) {
+  player.audio.addEventListener(ev, () => {
+    const err = player.audio.error;
+    console.info(`[audio] ${ev}${err ? ` code=${err.code} ${err.message}` : ''} t=${player.audio.currentTime.toFixed(1)}/${player.audio.duration || 0}`);
+  });
+}
 
 const NEURAL_LOOKAHEAD = 2; // sentences synthesized ahead of the one being played
 // Tiny silent clip played on the tap itself, so iOS lets us play real audio after the model finishes loading.
@@ -488,8 +494,11 @@ function bindSettings() {
         toast(`${neural.backend}: made ${seconds.toFixed(1)}s of audio in ${took.toFixed(1)}s`);
         player.audio.src = url;
         player.audio.playbackRate = settings.rate;
+        console.info('[app] calling audio.play()');
         await player.audio.play();
+        console.info('[app] audio.play() resolved');
       } catch (err) {
+        console.warn('[app] test voice failed:', err);
         toast(`High-quality voice failed: ${err.message}`);
       }
       return;
