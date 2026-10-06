@@ -136,6 +136,14 @@
     <label class="check"><input id="cpuOnlyChk" type="checkbox"> High-quality voices: use CPU only</label>
     <p class="hint">Turn this on if “Test voice” gets stuck on “Generating”. It uses a smaller model that works on more devices but is slower.</p>
     <label class="field"><span>Access key (for web page import)</span><input id="accessKeyInput" type="password" autocomplete="off" placeholder="The ACCESS_KEY you set when deploying"></label>
+    <details class="diag">
+      <summary>Diagnostics</summary>
+      <pre id="debugLog"></pre>
+      <div class="actions">
+        <button type="button" id="clearLogBtn" class="secondary">Clear</button>
+        <button type="button" id="copyLogBtn" class="secondary">Copy</button>
+      </div>
+    </details>
     <button type="button" id="lockBtn" class="secondary wide">Lock app</button>
     <div class="actions"><button type="button" id="settingsClose" class="primary">Done</button></div>
   </dialog>

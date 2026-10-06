@@ -44,8 +44,11 @@ export function setCpuOnly(value) {
 // Uses the GPU (WebGPU, fast, ~300 MB model) when available, otherwise the CPU (WASM, slower, ~90 MB model).
 export function load(onProgress) {
   ttsPromise ??= (async () => {
+    console.info('[neural] loading library');
     const { KokoroTTS } = await import(LIB);
+    console.info('[neural] library loaded');
     const create = (device, dtype) => {
+      console.info(`[neural] loading model: ${device}/${dtype}`);
       const files = new Map();
       return KokoroTTS.from_pretrained(MODEL, {
         dtype,
@@ -60,7 +63,9 @@ export function load(onProgress) {
         },
       });
     };
-    if (!cpuOnly && await hasWebGPU()) {
+    const gpu = !cpuOnly && await hasWebGPU();
+    console.info(`[neural] webgpu available: ${gpu}${cpuOnly ? ' (CPU-only is on)' : ''}`);
+    if (gpu) {
       try {
         const tts = await create('webgpu', 'fp32');
         backend = 'WebGPU';
@@ -86,6 +91,7 @@ export function synthesize(text, voiceURI) {
   const voice = voiceURI.slice(PREFIX.length);
   const run = async () => {
     const tts = await load();
+    console.info(`[neural] generating: “${text.slice(0, 40)}”`);
     const t0 = performance.now();
     const audio = await tts.generate(text, { voice });
     const took = (performance.now() - t0) / 1000;

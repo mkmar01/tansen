@@ -220,3 +220,7 @@ body.locked .gate { display: grid; }
 .gate-card h1 { margin: .5rem 0 0; }
 .gate-card .muted { margin: .25rem 0 1.25rem; }
 .gate-card .field { text-align: left; }
+
+.diag { margin: 1rem 0; font-size: .85rem; }
+.diag summary { color: var(--muted); cursor: pointer; }
+.diag pre { max-height: 40vh; overflow: auto; white-space: pre-wrap; word-break: break-word; font: .72rem/1.35 ui-monospace, Menlo, monospace; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .5rem; }

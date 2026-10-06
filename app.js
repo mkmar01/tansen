@@ -9,6 +9,24 @@ const synth = window.speechSynthesis;
 // Apple ships joke voices that are useless for long-form listening.
 const NOVELTY_VOICES = /^(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Junior|Ralph|Kathy|Deranged|Hysterical|Pipe Organ)\b/;
 
+// Keeps a rolling log (also saved to storage, so it survives iOS killing the page) for Settings → Diagnostics.
+const LOG_KEY = 'debugLog';
+const LOG_MAX = 80;
+const readLog = () => { try { return JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch { return []; } };
+function logLine(level, args) {
+  const text = args.map(a => (a instanceof Error ? `${a.name}: ${a.message}` : typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+  const lines = readLog();
+  lines.push(`${new Date().toLocaleTimeString()} ${level} ${text}`);
+  try { localStorage.setItem(LOG_KEY, JSON.stringify(lines.slice(-LOG_MAX))); } catch { /* storage full or blocked */ }
+}
+for (const level of ['info', 'warn', 'error']) {
+  const original = console[level].bind(console);
+  console[level] = (...args) => { original(...args); logLine(level, args); };
+}
+window.addEventListener('error', e => logLine('error', [e.message]));
+window.addEventListener('unhandledrejection', e => logLine('error', ['unhandled', e.reason]));
+console.info(`[app] start · ${navigator.userAgent} · webgpu: ${!!navigator.gpu} · memory(GB): ${navigator.deviceMemory ?? 'n/a'}`);
+
 const settings = {
   voiceURI: '',
   rate: 1,
@@ -426,6 +444,7 @@ function bindSettings() {
     $('#keepAwakeChk').checked = settings.keepAwake;
     $('#skipLinksChk').checked = settings.skipLinks;
     $('#cpuOnlyChk').checked = settings.cpuOnly;
+    $('#debugLog').textContent = readLog().join('\n') || '(empty)';
     $('#accessKeyInput').value = settings.accessKey;
     dlg.showModal();
   };
@@ -436,6 +455,18 @@ function bindSettings() {
     saveSettings();
     if (!settings.keepAwake) releaseWakeLock();
     else if (player.playing) acquireWakeLock();
+  };
+  $('#copyLogBtn').onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(readLog().join('\n'));
+      toast('Log copied.');
+    } catch {
+      toast('Couldn’t copy — select the text and copy it manually.');
+    }
+  };
+  $('#clearLogBtn').onclick = () => {
+    localStorage.removeItem(LOG_KEY);
+    $('#debugLog').textContent = '(empty)';
   };
   $('#cpuOnlyChk').onchange = e => {
     settings.cpuOnly = e.target.checked;
